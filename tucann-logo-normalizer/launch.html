@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="pl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Uruchamianie TUCANN Fixer</title></head>
+<body style="margin:0;background:#0b1120;color:white;font-family:system-ui;display:grid;place-items:center;min-height:100vh"><p>Uruchamianie aplikacji…</p>
+<script>
+fetch('index.html').then(function(r){return r.text();}).then(function(html){
+  html=html.replace('<script src="app.js"><\/script>','<script src="engine.js"><\/script><script src="app.js"><\/script>');
+  document.open();document.write(html);document.close();
+}).catch(function(e){document.body.innerHTML='<p>Nie udało się uruchomić aplikacji: '+e.message+'</p>';});
+</script>
+</body>
+</html>
