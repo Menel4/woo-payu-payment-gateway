@@ -1,1 +1,161 @@
-__LOCAL_FILE_CONTENT_NOT_SUPPORTED__
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101827">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TUCANN Fixer">
+  <title>TUCANN Logo Normalizer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">TUCANN TOOLS</p>
+      <h1>Logo Normalizer</h1>
+      <p class="subtitle">Usuwanie tła, wyrównanie symbolu, wygładzanie i eksport PNG/SVG.</p>
+    </div>
+    <button id="installBtn" class="button ghost hidden" type="button">Dodaj do ekranu</button>
+  </header>
+
+  <main class="layout">
+    <section class="panel controls-panel">
+      <div class="section-heading">
+        <div>
+          <span class="step">1</span>
+          <h2>Dodaj logotypy</h2>
+        </div>
+        <span id="fileCount" class="badge">0 plików</span>
+      </div>
+
+      <label class="upload-zone" id="dropZone">
+        <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp,image/heic,image/heif" multiple>
+        <span class="upload-icon">＋</span>
+        <strong>Wybierz zdjęcia lub pliki logo</strong>
+        <small>PNG, JPG, WEBP, HEIC. Możesz zaznaczyć wiele plików.</small>
+      </label>
+
+      <div id="fileList" class="file-list empty-state">
+        <p>Dodane pliki pojawią się tutaj.</p>
+      </div>
+
+      <div class="section-heading compact">
+        <div>
+          <span class="step">2</span>
+          <h2>Ustawienia</h2>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <label>
+          Format wyjściowy
+          <select id="presetSelect">
+            <option value="1600x900">16:9 — 1600 × 900</option>
+            <option value="1920x1080">16:9 — 1920 × 1080</option>
+            <option value="1080x1080">Kwadrat — 1080 × 1080</option>
+            <option value="custom">Własny</option>
+          </select>
+        </label>
+        <div class="inline-fields">
+          <label>Szerokość<input id="canvasWidth" type="number" min="256" max="4096" value="1600"></label>
+          <label>Wysokość<input id="canvasHeight" type="number" min="256" max="4096" value="900"></label>
+        </div>
+        <label>
+          Tło wejściowe
+          <select id="backgroundMode">
+            <option value="auto">Automatyczne z narożników</option>
+            <option value="white">Białe</option>
+            <option value="custom">Własny kolor</option>
+            <option value="none">Nie usuwaj</option>
+          </select>
+        </label>
+        <label id="customColorWrap" class="hidden">
+          Kolor tła
+          <input id="customBgColor" type="color" value="#ffffff">
+        </label>
+        <label class="range-label">
+          Tolerancja usuwania tła
+          <span id="toleranceValue">24</span>
+          <input id="tolerance" type="range" min="0" max="100" value="24">
+        </label>
+        <label class="range-label">
+          Zajętość pola przez logo
+          <span id="contentScaleValue">78%</span>
+          <input id="contentScale" type="range" min="45" max="95" value="78">
+        </label>
+        <label>
+          Sposób wyrównania
+          <select id="normalizeMode">
+            <option value="symbol">Dominujący symbol (ptak)</option>
+            <option value="whole">Całe logo</option>
+          </select>
+        </label>
+        <label>
+          Liczba kolorów SVG
+          <select id="vectorColors">
+            <option value="2">2 — znak jednobarwny</option>
+            <option value="4" selected>4 — proste logo</option>
+            <option value="8">8 — więcej detali</option>
+            <option value="16">16 — maksymalna zgodność</option>
+          </select>
+        </label>
+        <label class="toggle"><input id="edgeCleanup" type="checkbox" checked><span>Usuń jasną obwódkę po tle</span></label>
+        <label class="toggle"><input id="smoothRaster" type="checkbox" checked><span>Wygładź PNG przez oversampling</span></label>
+        <label class="toggle"><input id="keepInside" type="checkbox" checked><span>Nie pozwalaj przyciąć zawartości</span></label>
+      </div>
+
+      <div class="section-heading compact">
+        <div>
+          <span class="step">3</span>
+          <h2>Przetwarzanie</h2>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="processBtn" class="button primary" type="button" disabled>Popraw wszystkie</button>
+        <button id="downloadZipBtn" class="button secondary" type="button" disabled>Pobierz ZIP: PNG + SVG</button>
+      </div>
+      <p id="status" class="status" aria-live="polite">Dodaj co najmniej jeden plik. Pierwszy plik zostanie wzorcem.</p>
+      <div id="progressWrap" class="progress-wrap hidden"><div id="progressBar" class="progress-bar"></div></div>
+    </section>
+
+    <section class="panel preview-panel">
+      <div class="preview-header">
+        <div>
+          <p class="eyebrow">PODGLĄD</p>
+          <h2 id="previewTitle">Brak wybranego pliku</h2>
+        </div>
+        <div class="segmented">
+          <button id="beforeTab" class="active" type="button">Przed</button>
+          <button id="afterTab" type="button">Po</button>
+        </div>
+      </div>
+      <div class="checkerboard" id="previewStage">
+        <img id="beforePreview" alt="Podgląd pliku wejściowego">
+        <canvas id="afterPreview" class="hidden"></canvas>
+        <div id="previewEmpty" class="preview-empty">Dodaj logo, aby zobaczyć podgląd.</div>
+      </div>
+      <div class="metrics" id="metrics">
+        <div><span>Wzorzec</span><strong>—</strong></div>
+        <div><span>Symbol</span><strong>—</strong></div>
+        <div><span>Skala</span><strong>—</strong></div>
+        <div><span>Status</span><strong>Oczekuje</strong></div>
+      </div>
+      <div class="note">
+        <strong>Jak uzyskać najlepszy efekt</strong>
+        <p>Jako wzorzec wybierz najbardziej poprawne logo. Aplikacja wyrówna pozostałe według największego spójnego symbolu, zwykle ptaka, a mniejsze elementy i napis zachowa w ich dotychczasowym położeniu.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Przetwarzanie odbywa się lokalnie w przeglądarce. Pliki nie są wysyłane na serwer.</span>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/imagetracerjs@1.2.6/imagetracer_v1.2.6.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
