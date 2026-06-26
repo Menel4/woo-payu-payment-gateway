@@ -117,3 +117,5 @@ window.TucannEngine = (() => {
   function download(data,name,type){const b=data instanceof Blob?data:new Blob([data],{type});const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);}
   return{decode,prepare,render,vectorize,blob,download,nextFrame};
 })();
+
+setTimeout(function(){ import('./enhancement.js?v=2'); },0);
